@@ -214,6 +214,11 @@ uint32_t Wheel(uint16_t WheelPos)
       r = WheelPos % 128;      //red up
       g = 0;                  //green off
       break;
+    default:
+      r = 0;
+      g = 0;
+      b = 0;
+    break;
   }
   return (strip.Color(r, g, b));
 }
