@@ -1,3 +1,25 @@
+// Set up segments left to right.
+void setupSegments(vector<Segment>* segments) {
+  if (matrixForStrip == false) {
+    kMatrixHeight = 1;
+    kMatrixWidth = NUM_LEDS;
+  }
+
+  for (int i = 0; i < kMatrixHeight; i++) {
+
+    uint8_t startIndex;
+    uint8_t endIndex;
+
+    if (matrixForStrip) {
+      startIndex = i * kMatrixWidth + (i * (SpacerLEDSForGridWrap ));
+      endIndex = startIndex + kMatrixWidth - 1;
+    } else {
+      startIndex = i * (NUM_LEDS / kMatrixHeight);
+      endIndex = startIndex + (NUM_LEDS / kMatrixHeight);
+    }
+    segments->push_back(Segment(startIndex, endIndex));
+  }
+}
 
 class Colors : public Animation {
     unsigned long sTimer = 0;
