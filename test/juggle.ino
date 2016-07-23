@@ -1,3 +1,4 @@
+
 /* Juggle
 
   By: Originally by Mark Kriegsman
@@ -19,21 +20,15 @@ uint8_t    thissat = 255;                                     // Saturation of t
 uint8_t thisbright = max_bright;                                     // How bright should the LED/display be.
 uint8_t   basebeat =   5;                                     // Higher = faster movement.
 
-
 void progJuggle() {
   if (matrixForStrip) {
     for (int i = 0; i < kMatrixHeight; i++) {
       ChangeMe();
       juggle(segments[i].startIndex, kMatrixWidth, kMatrixHeight);
-
     }
-      
-    
   } else {
     ChangeMe();
     juggle(0, NUM_LEDS, 1);
-    
-
   }
   FastLED.show(); // Power managed display of LED's.
 }
@@ -42,11 +37,10 @@ void juggle(uint8_t start, uint8_t numleds, uint8_t basebeatMult) {             
   curhue = thishue;                                           // Reset the hue values.
   fadeToBlackBy(leds, NUM_LEDS, faderate);
   for ( int i = 0; i < numdots; i++) {
-    leds[beatsin16((basebeat * basebeatMult) + i + numdots, start, start+numleds)] += CHSV(curhue, thissat, thisbright); //beat16 is a FastLED 3.1 function
+    leds[beatsin16((basebeat * basebeatMult) + i + numdots, start, start + numleds)] += CHSV(curhue, thissat, thisbright); //beat16 is a FastLED 3.1 function
     curhue += hueinc;
   }
-} // juggle()
-
+}
 
 void ChangeMe() {                                             // A time (rather than loop) based demo sequencer. This gives us full control over the length of each sequence.
   uint8_t secondHand = (millis() / 1000) % 30;                // IMPORTANT!!! Change '30' to a different value to change duration of the loop.
@@ -61,3 +55,4 @@ void ChangeMe() {                                             // A time (rather 
     }
   }
 } // ChangeMe()
+

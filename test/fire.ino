@@ -1,7 +1,6 @@
 
 bool gReverseDirection = false;
 
-
 // Fire2012 with programmable Color Palette
 //
 // This code is the same fire simulation as the original "Fire2012",

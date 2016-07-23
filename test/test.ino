@@ -1,3 +1,4 @@
+
 // Notes: Adding a ton of LEDs may cause int overflow errors, check their sizes.
 // Vectors handle their own memory deallocation, the objects in the vectors do not. Potential mem problem.
 
@@ -7,7 +8,6 @@
 #include <utility.h>
 #include <vector>
 #include <FastLED.h>
-#include "all_headers.h"
 
 using namespace std;
 
@@ -29,29 +29,44 @@ using namespace std;
 #define USE_SERPENTINE true
 
 // Constants for Matrix set up
-class Main {
-    static bool matrixForStrip = USE_MATRIX; // So it can be changed later.
-    static uint8_t SpacerLEDSForGridWrap = INIT_SPACER_WRAP;
-    static uint8_t Main::kMatrixWidth  = INIT_MATRIX_WIDTH; // Watch out when changing, there are spacers that overflow the total LED_NUMS
-    static uint8_t Main::kMatrixHeight = INIT_MATRIX_HEIGHT; // Watch out when changing, there are spacers that overflow the total LED_NUMS
-    static const bool kMatrixSerpentineLayout = USE_SERPENTINE;
+bool matrixForStrip = USE_MATRIX; // So it can be changed later.
+uint8_t SpacerLEDSForGridWrap = INIT_SPACER_WRAP;
+uint8_t kMatrixWidth  = INIT_MATRIX_WIDTH; // Watch out when changing, there are spacers that overflow the total LED_NUMS
+uint8_t kMatrixHeight = INIT_MATRIX_HEIGHT; // Watch out when changing, there are spacers that overflow the total LED_NUMS
+const bool kMatrixSerpentineLayout = USE_SERPENTINE;
 
-    static typedef void (*FuncPtr) ();
-    static uint8_t max_bright = MAX_BRIGHTNESS;                                      // Overall brightness definition. It can be changed on the fly.
-    //struct CRGB leds[NUM_LEDS];                                   // Initialize our LED array.
-    //CRGB* const ledsPtr(leds + 1);
-    static CRGB leds_plus_safety_pixel[ NUM_LEDS + 1];
-    static CRGB* const leds( leds_plus_safety_pixel + 1);
+typedef void (*FuncPtr) ();
+uint8_t max_bright = MAX_BRIGHTNESS;                                      // Overall brightness definition. It can be changed on the fly.
+//struct CRGB leds[NUM_LEDS];                                   // Initialize our LED array.
+//CRGB* const ledsPtr(leds + 1);
+CRGB leds_plus_safety_pixel[ NUM_LEDS + 1];
+CRGB* const leds( leds_plus_safety_pixel + 1);
 
-    static vector<Segment> segments;
 
-    static unsigned long changeAnim;
-    static unsigned long loopCounter = 0;
+unsigned long changeAnim;
+unsigned long loopCounter = 0;
 
-    static vector<Animation*> animations;
-    static int animationIndex = 0;
-}
+class Segment {
+  public:
+    float orientation;
+    uint8_t startIndex;
+    uint8_t endIndex;
 
+    uint8_t numLEDs() {
+      return endIndex - startIndex;
+    };
+
+    Segment(uint8_t _start, uint8_t _end) {
+      orientation = 0;
+      startIndex = _start;
+      endIndex = _end;
+    };
+};
+
+
+vector<Segment> segments;
+vector<FuncPtr> animations;
+int animationIndex = 0;
 
 void setup() {
   // USB communication
@@ -61,21 +76,20 @@ void setup() {
   LEDS.addLeds<LED_TYPE, LED_DT, LED_CK, COLOR_ORDER>(leds, NUM_LEDS); // Use this for WS2801 or APA102
   FastLED.setBrightness(max_bright);
 
-  // Defining animations of animations.
-
-  animations.push_back(new Lightning());
-  //  animations.push_back(new Juggle());
-  //  animations.push_back(new HueGrid());
-  //  animations.push_back(new Segments());
-  //  animations.push_back(new Fire());
-  //  animations.push_back(new Noise());
-  //  animations.push_back(new Demo());
-  //  animations.push_back(new Blast());
-  //  animations.push_back(new Bounce());
+  animations.push_back(progLightning);
+  animations.push_back(progJuggle);
+  animations.push_back(progHueGrid);
+  
+  animations.push_back(progSegments);
+  animations.push_back(progFire);
+  animations.push_back(progNoise);
+  
+  animations.push_back(progDemo);
+  animations.push_back(progBlast);
+  animations.push_back(progBounce);
 
   // Set ups.
   setupSegments(&segments);
-
   setupBounce();
   setupNoise();
 
@@ -92,7 +106,7 @@ void loop() {
     if (millis() - changeAnim > 3000) {
       int seq = random() % animations.size();
       Serial.println("Starting new sequence: " + String(seq));
-      animationIndex = req;
+      animationIndex = seq;
       changeAnim = millis();
       clearAnim();
     }
@@ -108,7 +122,7 @@ void loop() {
     //progJuggle();
     //    progFire();
     //    (*animationFunc)();
-    animations[animationIndex].run();
+    (*animations[animationIndex])();
   } else {
     serialFlush();
     delay(100000);
@@ -129,27 +143,4 @@ void serialFlush() {
 
 void progStarting() {
   Serial.println("Starting...");
-}
-
-// Set up segments left to right.
-void setupSegments(vector<Segment>* segments) {
-  if (matrixForStrip == false) {
-    kMatrixHeight = 1;
-    kMatrixWidth = NUM_LEDS;
-  }
-
-  for (int i = 0; i < kMatrixHeight; i++) {
-
-    uint8_t startIndex;
-    uint8_t endIndex;
-
-    if (matrixForStrip) {
-      startIndex = i * kMatrixWidth + (i * (SpacerLEDSForGridWrap ));
-      endIndex = startIndex + kMatrixWidth - 1;
-    } else {
-      startIndex = i * (NUM_LEDS / kMatrixHeight);
-      endIndex = startIndex + (NUM_LEDS / kMatrixHeight);
-    }
-    segments->push_back(Segment(startIndex, endIndex));
-  }
 }

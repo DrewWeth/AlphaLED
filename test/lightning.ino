@@ -5,6 +5,9 @@
 //  This modified version creates lightning along various sections of the strip. Looks great inside my poly fill constructed cloud.
 
 // Global variables can be changed on the fly.
+
+
+
 uint8_t frequency = 50;                                       // controls the interval between strikes
 uint8_t flashes = 8;                                          //the upper limit of flashes per strike
 unsigned int dimmer = 1;
@@ -13,13 +16,14 @@ uint8_t ledstart;                                             // Starting locati
 uint8_t ledlen;                                               // Length of a flash
 
 
+
 void progLightning() {
   if (matrixForStrip) {
     uint8_t randomRow = (random() % kMatrixHeight);
     ledstart = XY(random8(kMatrixWidth), randomRow);           // Determine starting location of flash
     ledlen = random8(kMatrixWidth);  // Determine length of flash (not to go beyond NUM_LEDS-1)
-    if(ledlen + ledstart > NUM_LEDS - 1) // Make sure flashes dont go off the strip
-      ledlen = NUM_LEDS - ledstart - 1; 
+    if (ledlen + ledstart > NUM_LEDS - 1) // Make sure flashes dont go off the strip
+      ledlen = NUM_LEDS - ledstart - 1;
   } else {
     ledstart = random8(NUM_LEDS);           // Determine starting location of flash
     ledlen = random8(NUM_LEDS - ledstart);  // Determine length of flash (not to go beyond NUM_LEDS-1)
